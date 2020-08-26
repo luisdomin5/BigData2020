@@ -1,0 +1,3 @@
+Import Command mySQL -> HDFS
+
+sqoop import --connect jdbc:mysql://localhost/BigData2020 --username root -P --table Emp --target-dir nhobbs/sql-data
