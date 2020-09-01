@@ -9,6 +9,7 @@ def send_response(key,response):
 		return
 	# Send the message to the queue in kafka
 	producer.send(key,response.json())
+	producer.flush()
 
 
 
