@@ -2,7 +2,7 @@ from weather-api import *
 from kafka import KafkaProducer
 import json
 
-def send_response(response,key):
+def send_response(key,response):
 	# Exit if the request failed
 	if response.status_code != 200:
 		print('Bad Response')
@@ -14,6 +14,10 @@ def send_response(response,key):
 
 producer = KafkaProducer(bootstrap_servers=['broker1':'localhost:9093'],
 		value_serializer=lambda x:json.dumps(x).encode('ascii'))
+
+topic='uk'
+send_reponse(topic,get_current_weather('London'))
+send_reponse(topic,get_current_weather('Bristol%2Cuk'))
 
 # TODO: Create function to produce and send data to kafka on timer
 
