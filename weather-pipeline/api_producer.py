@@ -1,4 +1,4 @@
-from weather-api import *
+from weather_api import *
 from kafka import KafkaProducer
 import json
 
@@ -12,12 +12,14 @@ def send_response(key,response):
 
 
 
-producer = KafkaProducer(bootstrap_servers=['broker1':'localhost:9093'],
+producer = KafkaProducer(bootstrap_servers=['localhost:9093'],
 		value_serializer=lambda x:json.dumps(x).encode('ascii'))
 
 topic='uk'
-send_reponse(topic,get_current_weather('London'))
-send_reponse(topic,get_current_weather('Bristol%2Cuk'))
+send_response(topic,get_current_weather('London'))
+send_response(topic,get_current_weather('Bristol,uk'))
+send_response('us',get_current_weather('New York'))
+producer.flush()
 
 # TODO: Create function to produce and send data to kafka on timer
 
