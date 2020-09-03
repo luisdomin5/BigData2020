@@ -17,7 +17,7 @@ def send_response(key,response):
 
 
 producer = KafkaProducer(bootstrap_servers=['localhost:9093'],
-		value_serializer=lambda x:json.dumps(x).encode('ascii'))
+		value_serializer=lambda x:json.dumps(x).encode('utf-8'))
 
 topic='realtime'
 send_response(topic,get_weather_data('realtime','london'))
