@@ -1,6 +1,7 @@
 from weather_api import *
 from kafka import KafkaProducer
 import json
+import time
 
 def send_response(key,response):
 	if response==None:
@@ -20,10 +21,12 @@ producer = KafkaProducer(bootstrap_servers=['localhost:9093'],
 		value_serializer=lambda x:json.dumps(x).encode('utf-8'))
 
 topic='realtime'
-send_response(topic,get_weather_data('realtime','london'))
-send_response(topic,get_weather_data('realtime','bristol'))
-send_response(topic,get_weather_data('realtime','new york'))
-producer.flush()
+while(True):
+	send_response(topic,get_weather_data('realtime','london'))
+	send_response(topic,get_weather_data('realtime','bristol'))
+	send_response(topic,get_weather_data('realtime','new york'))
+	producer.flush()
+	time.sleep(10)
 
 # TODO: Create function to produce and send data to kafka on timer
 
