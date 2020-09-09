@@ -1,20 +1,22 @@
-from pyspark import SparkContext
-from pyspark.streaming import StreamingContext
-from pyspark.streaming.kafka import KafkaUtils
-import json
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import *
+# spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.4
 
-sc = SparkContext(appName='Weather Pipeline')
-sc.setLogLevel('ERROR')
-ssc = StreamingContext(sc,2)
+spark = SparkSession.builder.appName('Weather-api').getOrCreate()
+spark.sparkContext.setLogLevel("WARN")
+#read json schema from a test file
+json_schema = spark.read.format('json').load('file:////home/nhobbs/BigData2020/task6/data.txt').schema
 
-brokers,topic = 'localhost:9093','realtime'
-kvs = KafkaUtils.createDirectStream(ssc,[topic],{'metadata.broker.list':brokers,'auto.offset.reset':'smallest'})
+df = spark.readStream.format('kafka')\
+    .option('kafka.bootstrap.servers','localhost:9093')\
+    .option('subscribe','realtime')\
+    .load()
 
-order = ['lat','lon','observation_time','weather_code']	
+df_data = df.select(from_json(col("value")\
+              .cast("string"), json_schema)\
+                    .alias('weather')).selectExpr('weather.*')
 
-records = kvs.map(lambda x: json.loads(x[1]))
-transform = records.map(lambda r: [r[i] for i in order])
-transform.pprint()
+out = df_data.writeStream.format('console').outputMode('append').start()
 
-ssc.start()
-ssc.awaitTermination()
+out.awaitTermination()
+
