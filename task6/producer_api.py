@@ -26,7 +26,7 @@ while(True):
 	send_response(topic,get_weather_data('realtime','bristol'))
 	send_response(topic,get_weather_data('realtime','new york'))
 	producer.flush()
-	time.sleep(10)
+	time.sleep(5)
 
 # TODO: Create function to produce and send data to kafka on timer
 
