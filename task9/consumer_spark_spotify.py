@@ -1,7 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
-import pyspark.sql.functions as F
-# spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.4
+# spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.3.0
 
 spark = SparkSession.builder.appName('Weather-api').getOrCreate()
 spark.sparkContext.setLogLevel("WARN")
@@ -14,11 +13,17 @@ df = spark.readStream.format('kafka')\
     .option('startingOffsets','earliest')\
     .load()
 
+""" Select data of use:
+track_name,artist, album, release_date,popularity,track_id
+"""
 df_data = df.select(from_json(col("value")\
               .cast("string"), spotify_schema).alias('parsed_value')).selectExpr('parsed_value.*')
 
-#df_final = df_data.withColumn('album name',col('album.name')).withColumn('release date',col('album.release_date')).select('album name','release date')
+df_final = df_data \
+	.withColumn('album_name',col('album.name')) \
+	.withColumn('release_date',col('album.release_date')) \
+	.selectExpr('name as track_name','artists[0].name as artist','album_name','release_date','popularity','id as track_id')
 
-out = df_data.writeStream.format('console').outputMode('append').start()
+out = df_final.writeStream.format('console').outputMode('append').start()
 
 out.awaitTermination()
