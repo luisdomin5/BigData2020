@@ -1,0 +1,15 @@
+# Create a table in hive
+hive> CREATE TABLE emp(id int,name string, last_name string,email string,gender string) row format delimited fields terminated by ',' TBLPROPERTIES ('skip.header.line.count'='1'); 
+
+# Load csv into hive table
+hive> LOAD DATA LOCAL INPATH '/home/maria_dev/mock_data.csv' OVERWRITE INTO TABLE emp;
+
+# Create table in hbase with 1 column family 'personal'
+hbase(main): create 'engineer','personal'
+
+# Create table linked to hbase in hive
+CREATE EXTERNAL TABLE engineer (key int, name string, last_name string, email string, gender string)  STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,personal:name,personal:last_name,personal:email,personal:gender") TBLPROPERTIES ("hbase.table.name" = "engineer", "hbase.mapred.output.outputtable" = "engineer");
+
+# Load data into hive table, this data is shown in hbase table too
+from emp insert overwrite table engineer select *;
+
